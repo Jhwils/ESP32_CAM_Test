@@ -42,5 +42,12 @@ uint8_t PCA_Read(uint8_t reg) {
   return Wire.read();
 }
 
+// 二进制打印辅助函数, 因为在读取与写入测试中，
+// 只需要关注低4位和高4位，所以只打印4位二进制
+void printBinary(uint8_t value) {
+  for (int8_t i = 3; i >= 0; i--) {
+    Serial.write(value & (1 << i) ? '1' : '0');
+  }
+}
 
 
