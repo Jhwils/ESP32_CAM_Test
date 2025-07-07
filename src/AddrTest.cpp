@@ -7,25 +7,25 @@
 void Addrtest(TwoWire *wire, uint8_t Addr, const char* busName) 
 {
   Serial.println("-------------------");
-  Serial.printf("在 %s 上扫描地址: 0x%02X\n", busName, Addr);
+  Serial.printf("Current I2C bus: %s, Scan Address: 0x%02X\n", busName, Addr);
   
   wire->beginTransmission(Addr);
   uint8_t error = wire->endTransmission();
   
   if (error == 0) { 
-    Serial.printf("设备 @ 0x%02X 在 %s 上检测成功\n", Addr, busName);
+    Serial.printf("Device @ 0x%02X in %s was successfully scaned\n", Addr, busName);
   }
   else if (error == 1) {
-    Serial.printf("地址 0x%02X 在 %s 上无响应 (错误代码: 1 - 数据过长)\n", Addr, busName);
+    Serial.printf("Address 0x%02X in %s didn't response (Error Code 1 - Too long data)\n", Addr, busName);
   }
   else if (error == 2) {
-    Serial.printf("地址 0x%02X 在 %s 上无响应 (错误代码: 2 - 收到NACK)\n", Addr, busName);
+    Serial.printf("Address 0x%02X in %s didn't response (Error Code 2 - Receive NACK)\n", Addr, busName);
   }
   else if (error == 3) {
-    Serial.printf("地址 0x%02X 在 %s 上无响应 (错误代码: 3 - 发送数据失败)\n", Addr, busName);
+    Serial.printf("Address 0x%02X in %s didn't response (Error Code 3 - Failed to transmit the data)\n", Addr, busName);
   }
   else {
-    Serial.printf("地址 0x%02X 在 %s 上发生未知错误 (错误代码: %d)\n", Addr, busName, error);
+    Serial.printf("Address 0x%02X in  %s received an unkown error (Error Code %d)\n", Addr, busName, error);
   }
   
   Serial.println("-------------------\n");

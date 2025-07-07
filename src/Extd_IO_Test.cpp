@@ -26,11 +26,10 @@ void PCA_Write(uint8_t reg, uint8_t data) {
     Wire.beginTransmission(PCA9534_ADDR); //写入PCA9534地址，开始I2C通信
     Wire.write(reg); // 写入寄存器地址
     Wire.write(data); // 写入数据
-    Wire.endTransmission(); // 结束I2C通信
-    if (Wire.endTransmission() != 0) {
-        Serial.println("Error: Write failed");
-    }    
-
+    if (Wire.endTransmission() != 0) 
+    { 
+      Serial.println("Error: PCA9534 write failed");
+    }
 }
 
 // 读取PCA9534寄存器
