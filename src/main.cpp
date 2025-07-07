@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <Wire.h>
-#include "C:\Repositories\i2c_Test\i2c_test\include\TestTemp.h"
-#include "C:\Repositories\i2c_Test\i2c_test\include\AddrTest.h"
+#include "TestTemp.h"
+#include "AddrTest.h"
 #include "Extd_IO_Test.h"
 
 #define PCA9534_ADDR 0x24
@@ -10,42 +10,69 @@
 #define REG_POLARITY 0x02 // 极性寄存器
 #define REG_CONFIG 0x03 // 配置寄存器
 
+#define AHT20_ADDR 0x38 // AHT20传感器地址
+#define W24C16_Addr 0x50 // W24C16 EEPROM地址
 
+// I2C总线配置
+#define RTC_SDA_PIN 41
+#define RTC_SCL_PIN 42
+#define SECOND_SDA_PIN 10  // 第二I2C总线SDA引脚
+#define SECOND_SCL_PIN 11  // 第二I2C总线SCL引脚
+
+// I2C时钟速率配置 (单位: Hz)
+#define RTC_I2C_CLOCK 100000   // 100kHz
+#define SECOND_I2C_CLOCK 100000 // 100kHzd
+
+void verifyAllDevices();
+TwoWire secondI2C = TwoWire(1);  // 使用I2C端口1
 
 void setup() {
-  Serial.begin(115200); // 初始化串口通信
-  Wire.begin(10,11); // 初始化I2C，默认引脚(SDA=21, SCL=22)
-  Serial.println("\nI2C Scanner Starting...");
-  Addrtest(); // 扫描I2C设备地址
+Serial.begin(115200);
+Wire.begin(RTC_SDA_PIN, RTC_SCL_PIN); //初始化i2c总线1 RTC_I2C
+Wire.setClock(RTC_I2C_CLOCK); // 设置RTC I2C总线时钟频率
+Serial.printf("RTC I2C总线初始化完成 (SDA:%d, SCL:%d)\n", RTC_SDA_PIN, RTC_SCL_PIN);
+Serial.printf("RTC I2C时钟频率: %d Hz\n", RTC_I2C_CLOCK);
 
-//  aht20_init();  // 初始化传感器
-  delay(100);    // 稳定时间
+// 初始化第二I2C总线
+secondI2C.begin(SECOND_SDA_PIN, SECOND_SCL_PIN);
+secondI2C.setClock(SECOND_I2C_CLOCK); // 设置第二I2C总线时钟频率
+Serial.printf("第二I2C总线初始化完成 (SDA:%d, SCL:%d)\n", SECOND_SDA_PIN, SECOND_SCL_PIN);
+Serial.printf("第二I2C时钟频率: %d Hz\n", SECOND_I2C_CLOCK);
+
+while (!Serial);
+Serial.println("\\nI2C Scanner");
+
+delay(1000);
+
+// 验证所有设备地址
+verifyAllDevices();
 }
 
 void loop() {
-/* temptest();    // 执行温湿度测试
-  delay(2000);   // 每2秒读取一次*/ 
-
-  // 测试1: LED流水灯 (使用低4位输出),即P0~P3
-  static uint8_t ledPattern = 0x01;
-  for (int i = 0; i < 4; i++) {
-    PCA_Write(REG_OUTPUT, ledPattern);
-    Serial.printf("LED状态: 0x%02X -> ", ledPattern);
-    printBinary(ledPattern & 0x0F);  // 只显示低4位，屏蔽高四位
-    
-    // 测试2: 读取按钮状态 (高4位输入)，即P4~P7
-    uint8_t buttons = PCA_Read(REG_INPUT) >> 4;  // 获取高4位
-    Serial.print(" | 按钮状态: ");
-    printBinary(buttons);
-    
-    //实现流水灯效果，从P0到P3循环点亮
-    ledPattern = (ledPattern << 1) | (ledPattern >> 3);  // 循环左移
-    delay(500);  // 效果可见
-  }
-  Serial.println("-------------------");
-
+  // 主循环不需要执行操作
+  delay(10000);
+  Serial.println("系统空闲...");
 }
 
+
+
+// 验证所有设备地址
+void verifyAllDevices() {
+  Serial.println("\n===== 开始地址验证 =====");
+  
+  // 验证RTC总线设备
+  Serial.println("\n[验证RTC I2C总线设备]");
+  Serial.printf("目标地址: 0x%02X (PCA9534)\n", PCA9534_ADDR);
+  Addrtest(&Wire, PCA9534_ADDR, "RTC总线");
+  
+  // 验证第二总线设备
+  Serial.println("\n[验证第二I2C总线设备]");
+  Serial.printf("目标地址: 0x%02X 和 0x%02X\n", AHT20_ADDR, W24C16_Addr);
+  Addrtest(&secondI2C, AHT20_ADDR, "第二总线");
+  Addrtest(&secondI2C, W24C16_Addr, "第二总线");
+  
+  Serial.println("\n===== 验证完成 =====");
+}
 
 
 
