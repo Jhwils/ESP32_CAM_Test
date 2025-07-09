@@ -12,33 +12,35 @@
 // 引脚定义 (ESP32)
 const int sdaPin = 41;
 const int sclPin = 42;
-void PCA_Write(uint8_t reg, uint8_t data);
 
 
 void RTC_SCL_init(void) 
 {
 	Wire.begin(sdaPin, sclPin); // 初始化I2C，指定SDA和SCL引脚
-  PCA_Write(REG_CONFIG, 0xF0); //设置P0~P4为输出，P5~P7为输入
+  PCA_Write(&Wire,REG_CONFIG, 0xF0); //设置P0~P4为输出，P5~P7为输入
 }
 
 //写入PCA9534寄存器
-void PCA_Write(uint8_t reg, uint8_t data) {
-    Wire.beginTransmission(PCA9534_ADDR); //写入PCA9534地址，开始I2C通信
-    Wire.write(reg); // 写入寄存器地址
-    Wire.write(data); // 写入数据
-    if (Wire.endTransmission() != 0) 
+bool PCA_Write(TwoWire* wire, uint8_t reg, uint8_t data) {
+    wire->beginTransmission(PCA9534_ADDR); //写入PCA9534地址，开始I2C通信
+    wire->write(reg); // 写入寄存器地址
+    wire->write(data); // 写入数据
+    if (wire->endTransmission() != 0) 
     { 
       Serial.println("Error: PCA9534 write failed");
+      return false; //写入失败，返回false
     }
+    else return true; //写入成功，返回true
 }
 
 // 读取PCA9534寄存器
-uint8_t PCA_Read(uint8_t reg) {
-  Wire.beginTransmission(PCA9534_ADDR);
-  Wire.write(reg);
-  Wire.endTransmission();
-  Wire.requestFrom(PCA9534_ADDR, 1);
-  return Wire.read();
+uint8_t PCA_Read(TwoWire* wire, uint8_t reg) { // 添加wire参数
+  wire->beginTransmission(PCA9534_ADDR);
+  wire->write(reg);
+  if(wire->endTransmission() != 0) return 0xFF;
+  
+  wire->requestFrom(PCA9534_ADDR, 1);
+  return wire->available() ? wire->read() : 0xFF;
 }
 
 // 二进制打印辅助函数, 因为在读取与写入测试中，
