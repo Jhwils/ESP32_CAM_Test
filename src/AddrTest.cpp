@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <Wire.h>
+#include"Extd_IO_Test.h"
 
 #define PCA9534_ADDR 0x24
 
@@ -30,4 +31,23 @@ void Addrtest(TwoWire *wire, uint8_t Addr, const char* busName)
   
   Serial.println("-------------------\n");
   delay(500); // 短延时避免总线拥塞
+}
+
+
+// Verify all device addresses
+void verifyAllDevices() {
+  Serial.println("\n===== Start Address Verification =====");
+  
+  // Verify RTC bus device
+  Serial.println("\n[RTC I2C Bus Device Verification]");
+  Serial.printf("Target address: 0x%02X (PCA9534)\n", PCA9534_ADDR);
+  Addrtest(&Wire, PCA9534_ADDR, "RTC Bus");
+  
+  // Verify second bus devices
+  Serial.println("\n[RTC Bus Device Verification, through physical wire]");
+  Serial.printf("Target addresses: 0x%02X and 0x%02X\n", AHT20_ADDR, W24C16_Addr);
+  Addrtest(&Wire, AHT20_ADDR, "RTC Bus");
+  Addrtest(&Wire, W24C16_Addr, "RTC Bus");
+  
+  Serial.println("\n===== Verification Complete =====\n");
 }

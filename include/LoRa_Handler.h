@@ -7,8 +7,8 @@
 // LoRa通信配置
 #define LORA_SERIAL Serial2   // 使用ESP32的Serial2
 #define LORA_BAUDRATE 9600    // LoRa模块的波特率
-#define LORA_RX_PIN 16        // LoRa TX -> ESP32 RX (GPIO16)
-#define LORA_TX_PIN 17        // LoRa RX -> ESP32 TX (GPIO17)
+#define LORA_RX_PIN 10        // LoRa TX -> ESP32 RX (GPIO10)
+#define LORA_TX_PIN 11        // LoRa RX -> ESP32 TX (GPIO11)
 
 // 初始化LoRa通信
 void lora_comm_init();

@@ -2,12 +2,7 @@
 #include <Wire.h>
 #include "Extd_IO_Test.h"
 
-//根据芯片原理图，A0=0, A1=0, A2=1;
-#define PCA9534_ADDR 0x24
-#define REG_INPUT 0x00 // 输入寄存器
-#define REG_OUTPUT 0x01 // 输出寄存器   
-#define REG_POLARITY 0x02 // 极性寄存器
-#define REG_CONFIG 0x03 // 配置寄存器
+
 
 // 引脚定义 (ESP32)
 const int sdaPin = 41;

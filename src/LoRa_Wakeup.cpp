@@ -13,7 +13,7 @@ typedef struct {
     bool is_initialized;      // 初始化标志
 } lora_wakeup_t;
 
-// 全局实例
+// 全局实例，只初始化一遍
 static lora_wakeup_t lora_wakeup = {
     .aux_pin = 0,
     .reason = WAKEUP_UNKNOWN,
@@ -54,8 +54,12 @@ void lora_enter_deep_sleep() {
     Serial.flush();
     
     // 断开所有不需要的外设以降低功耗，写在此处
-
-
+    for(int i = 0; i < GPIO_NUM_MAX; i++) {
+        if(!rtc_gpio_is_valid_gpio((gpio_num_t)i)) continue;
+        if(i == lora_wakeup.aux_pin) continue; // 保留唤醒引脚
+        rtc_gpio_set_direction((gpio_num_t)i, RTC_GPIO_MODE_OUTPUT_ONLY);
+        rtc_gpio_set_level((gpio_num_t)i, 0);
+    }
     // 这里可以添加更多低功耗设置
     
     // 进入深度睡眠
@@ -109,17 +113,7 @@ void lora_handle_wakeup() {
             case ESP_SLEEP_WAKEUP_TIMER:
                 Serial.println("[Wakeup] Timer");
                 lora_wakeup.reason = WAKEUP_TIMER;
-                break;
-                
-            case ESP_SLEEP_WAKEUP_TOUCHPAD:
-                Serial.println("[Wakeup] Touchpad");
-                lora_wakeup.reason = WAKEUP_OTHER;
-                break;
-                
-            case ESP_SLEEP_WAKEUP_ULP:
-                Serial.println("[Wakeup] ULP program");
-                lora_wakeup.reason = WAKEUP_OTHER;
-                break;
+                break;                                         
                 
             default:
                 Serial.printf("[Wakeup] Unknown reason: %d\n", esp_reason);
@@ -137,7 +131,7 @@ bool lora_data_available() {
     if (!lora_wakeup.is_initialized) return false;
     
     // 检查AUX引脚状态（低电平表示有数据）
-    return digitalRead(lora_wakeup.aux_pin) == LOW;
+    return digitalRead(lora_wakeup.aux_pin) == LOW; //怀疑此处逻辑有问题，aux_pin只是收数据时刻为低电平
 }
 
 // 启用定时器唤醒
