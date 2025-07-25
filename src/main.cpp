@@ -184,25 +184,31 @@ void setup()
     // Serial.print(WiFi.localIP());
     // Serial.println("' to connect");
 
-    // 进入深度睡眠
-    Serial.println("Returning to deep sleep...");
-    delay(100); // 确保串口消息发送完成
-    lora_enter_deep_sleep();
+    // // 进入深度睡眠
+    // Serial.println("Returning to deep sleep...");
+    // delay(100); // 确保串口消息发送完成
+    // lora_enter_deep_sleep();
+
+    Serial.println("\n[System] Entering main loop - listening for LoRa data...");
+    Serial.println("Send data to LoRa module to test reception");
+    Serial.println("\n=== LoRa Test Commands ===");
+    Serial.println("Type 'LORA:<message>' to send via LoRa");
+    Serial.println("Type 'HELP' for more commands");
+    Serial.println("Example: LORA:Hello World\n");
 }
 
 void loop()
 {
-    // Serial.println("\n\nRaw: ");
-    // Serial.println(adc_read_raw());
+    // 处理Serial0输入命令
+    handle_serial_input();
 
-    // Serial.println("Voltage: ");
-    // Serial.println(adc_read_volts() / 1000.0f);
+    // 持续监听LoRa数据
+    if (lora_has_data())
+    {
+        Serial.println("[Main Loop] LoRa data detected!");
+        process_lora_data();
+    }
 
-    // Serial.println("Voltage: ");
-    // Serial.println((adc_read_volts() / 1000.0f) * 6.1);
-
-    // Serial.println("Filtered: ");
-    // Serial.println(adc_read_filtered(8));
-
-    // delay(1000);
+    // 添加短暂延时避免过度占用CPU
+    delay(50);
 }
