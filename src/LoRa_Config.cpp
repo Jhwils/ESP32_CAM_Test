@@ -10,8 +10,8 @@ void PCA_init(void)
 
   // 配置寄存器: P0,P1(电机),P6,P7(LoRa)为输出，其他为输入
   uint8_t config = 0x00;
-  config |= (1 << MOTOR_IN1_BIT) | (1 << MOTOR_IN2_BIT);
-  config |= (1 << LORA_M0_BIT) | (1 << LORA_M1_BIT);
+  // config |= (1 << MOTOR_IN1_BIT) | (1 << MOTOR_IN2_BIT);
+  config |= ~((1 << LORA_M0_BIT) | (1 << LORA_M1_BIT)); // Debug: 此前没有取反，导致M0和M1都为输入
 
   PCA_Write(&Wire, REG_CONFIG, config);
 
@@ -73,7 +73,7 @@ void LoRa_Config_Init()
   const uint8_t configCmd[] = {
       0xC0, 0x00, 0x09, // 头部
       0x00,             // 地址高字节
-      0x00,             // 地址低字节
+      0x01,             // 地址低字节
       0x00,             // 网络地址，用于区分网络；相互通信时，应当设置为相同
       0x64,             // UART波特率及空中速率: 0x64= baud rate 9600bps, air velocity 2,4kbps
       0x20,             // 分包设定，环境噪声使能，发射功率，0x20 = 240字节分包， RSSI 环境噪声使能启用, 发射功率22dBm
@@ -88,9 +88,16 @@ void LoRa_Config_Init()
   Serial.println("[LoRa] Configuration command sent");
   delay(100); // 等待配置完成
 
+  // 清空串口接收缓冲区，防止配置回传数据干扰
+  while (LORA_SERIAL.available() > 0)
+  {
+    LORA_SERIAL.read();
+  }
+  Serial.println("[LoRa] Serial buffer cleared");
+
   // 切换回WOR模式
   setLoRaMode(MODE_WOR);
-  Serial.println("LoRa Module has entered WOR mode.\n");
+  Serial.println("LoRa Module has entered WOR mode.");
   delay(100);
 
   Serial.println("[LoRa] Configuration initialized");

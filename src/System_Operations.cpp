@@ -52,6 +52,8 @@ system_status_t system_self_test()
     /* Waited to insert actual code */
 
     Serial.println("[Test] All tests passed!");
+
+    Serial.println("===== SYSTEM SELF TEST END =====\n\n");
     return SYS_STATUS_OK;
 }
 

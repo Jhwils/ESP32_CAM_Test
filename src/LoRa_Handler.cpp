@@ -22,6 +22,18 @@ void process_lora_data()
         return;
     }
 
+    // 添加数据验证，过滤配置回传数据
+    uint8_t firstByte = LORA_SERIAL.peek();
+    if (firstByte == 0xC0 || firstByte == 0xE0)
+    {
+        Serial.println("[LoRa] Detected configuration response, clearing buffer");
+        while (LORA_SERIAL.available() > 0)
+        {
+            LORA_SERIAL.read();
+        }
+        return;
+    }
+
     // 读取所有可用数据
     Serial.println("Received LoRa data:");
     Serial.println("-------------------");

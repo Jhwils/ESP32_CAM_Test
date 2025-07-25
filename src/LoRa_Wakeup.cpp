@@ -153,7 +153,7 @@ bool lora_data_available()
         return false;
 
     // 检查AUX引脚状态（低电平表示有数据）
-    return digitalRead(lora_wakeup.aux_pin) == LOW; // 怀疑此处逻辑有问题，aux_pin只是收数据时刻为低电平
+    return true; // 实际上，aux拉低时间很短，难以检测
 }
 
 // 启用定时器唤醒
